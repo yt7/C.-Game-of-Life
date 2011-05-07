@@ -9,13 +9,6 @@
 #define OFF 0
 #define ON 1
 
-/** Note to self:
-  * Always refer to the board as board[x][y] as to follow the general
-  * standard for specifying coordinates. When looping, y must be declared
-  * first in the outer loop so that it represents the rows while x, declared
-  * within the y loop becomes the variable representing each column value.
- */
-
 static char board[ROWS][COLS];
 
 void print_board(void);
