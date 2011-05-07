@@ -4,18 +4,6 @@
 #include <time.h>
 #include <SDL/SDL.h>
 
-/* Creating a sleep macro that will compile under windows or linux. */
-#ifdef WIN32
-#include <windows.h>
-#define sleep(msec) Sleep(msec)
-#endif /* windows */
-#ifdef __linux__
-#define _XOPEN_SOURCE 9001
-#include <sys/types.h>
-#include <unistd.h>
-#define sleep(msec) usleep((useconds_t)(msec * 0.001))
-#endif /* linux */
-
 #define ROWS 15
 #define COLS 15
 #define OFF 0
