@@ -18,6 +18,7 @@ int main(int argc, char* argv[]) {
     short num_neighbours;
     short generator;
 
+    srand(time(NULL));
     memset((void*)board, OFF, ROWS*COLS); /* Set each cell to OFF. */
     print_board(board);
     for (short i = 0; i < (ROWS * COLS); i++) {
@@ -75,20 +76,20 @@ void update_board(char ptarr[]) {
         num_neighbours = number_of_neighbours(ptarr, i);
         if (num_neighbours < 2 && ptarr[i] == ON) {
             ptarr[i] = OFF; /* Cell dies by underpopulation. */
-            printf("Cell at index %d dies.\n", i);
+            printf("Cell at index (%d, %d) dies.\n", (i / ROWS), (COLS - i));
         }
         else if (num_neighbours > 3 && ptarr[i] == ON) {
             ptarr[i] = OFF; /* Cell dies by overpopulation. */
-            printf("Cell at index %d dies.\n", i);
+            printf("Cell at index (%d, %d) dies.\n", (i / ROWS), (COLS - i));
         }
         else if (num_neighbours == 3 && ptarr[i] == OFF) {
             ptarr[i] = ON; /* Cell becomes alive by reproduction. */
-            printf("Cell at index %d becomes alive.\n", i);
+            printf("Cell at index (%d, %d) becomes alive.\n", (i / ROWS), (COLS -i));
         }
         else if ((num_neighbours == 2 && ptarr[i] == ON) ||
                  (num_neighbours == 3 && ptarr[i] == ON)) {
             ptarr[i] = ON;
-            printf("Cell at index %d gets to live.\n", i);
+            printf("Cell at index (%d, %d) gets to live.\n", (i / ROWS), (COLS - i));
         }
     }
 }
