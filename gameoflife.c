@@ -9,12 +9,14 @@
 #define OFF 0
 #define ON 1
 
+static char board[ROWS][COLS];
+
 /** Bugs:
   * When COLS is significantly larger than ROWS, there is a segfault at runtime.
   * When ROWS is larger than COLS, only COLS rows are updated.1
  */
 void print_board(void);
-short num_neighbours(short x, short y);
+int num_neighbours(int x, int y);
 void update_board(void);
 
 int main(int argc, char* argv[]) {
@@ -22,11 +24,6 @@ int main(int argc, char* argv[]) {
 
     srand(time(NULL));
     memset((void *)board, OFF, ROWS * COLS);
-    for (int y = 0; y < ROWS; y++) {
-        for (int x = 0; x < COLS; x++) {
-            board[y][x] = OFF;
-        }
-    }
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
             generator = rand() % 8;
@@ -59,8 +56,8 @@ void print_board(void) {
     printf("\n");
 }
 
-short num_neighbours(short x, short y) {
-    short num_adj = 0;
+int num_neighbours(int x, int y) {
+    int num_adj = 0;
 
     if (y-1 >= 0)
         if (board[x][y-1] == ON) num_adj++;
@@ -82,7 +79,7 @@ short num_neighbours(short x, short y) {
 }
 
 void update_board(void) {
-    short neighbours = 0;
+    int neighbours = 0;
 
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
