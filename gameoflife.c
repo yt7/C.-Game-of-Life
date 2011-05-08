@@ -29,7 +29,7 @@ void print_board(void);
 short num_neighbours(short x, short y);
 void update_board(void);
 
-int main(int argc, char* argv[]) {
+int main(void) {
     short generator;
 
     srand(time(NULL));
@@ -78,26 +78,88 @@ void print_board(void) {
 
 short num_neighbours(short x, short y) {
     short num_adj = 0;
+    short tmpy;
+    short tmpx;
 
-    if (y-1 >= 0)
+    /* Check vertical neighbours. */
+    if (y-1 < 0)
+        tmpy = ROWS - 1;
+    else
+        tmpy = y - 1;
+    if (board[x][tmpy] == ON) num_adj++;
+    if (y+1 >= ROWS)
+        tmpy = 0;
+    else
+        tmpy = y + 1;
+    if (board[x][tmpy] == ON) num_adj++;
+    /*Check horizontal neighbours. */
+    if (x-1 < 0)
+        tmpx = COLS - 1;
+    else
+        tmpx = x - 1;
+    if (board[tmpx][y] == ON) num_adj++;
+    if (x+1 >= COLS)
+        tmpx = 0;
+    else
+        tmpx = x + 1;
+    if (board[tmpx][y] == ON) num_adj++;
+    /* Check upper diagonal neighbours. */
+    if (y-1 < 0)
+        tmpy = ROWS - 1;
+    else
+        tmpy = y - 1;
+    if (x-1 < 0)
+        tmpx = COLS - 1;
+    else
+        tmpx = x - 1;
+    if (board[tmpx][tmpy] == ON) num_adj++;
+    if (x+1 >= COLS)
+        tmpx = 0;
+    else
+        tmpx = x + 1;
+    if (board[tmpx][tmpy] == ON) num_adj++;
+    /* Check lower diagonal neighbours. */
+    if (y+1 >= ROWS)
+        tmpy = 0;
+    else
+        tmpy = y + 1;
+    if (x+1 >= COLS)
+        tmpx = 0;
+    else
+        tmpx = x + 1;
+    if (board[tmpx][tmpy] == ON) num_adj++;
+    if (x-1 < 0)
+        tmpx = COLS - 1;
+    else
+        tmpx = x - 1;
+    if (board[tmpx][tmpy] == ON) num_adj++;
+    return num_adj;
+}
+/*
+short num_neighbours(short x, short y) {
+    short num_adj = 0;
+
+    if (y-1 >= 0) {
         if (board[x][y-1] == ON) num_adj++;
         if (x+1 < COLS)
             if (board[x+1][y-1] == ON) num_adj++;
         if (x-1 >= 0)
             if (board[x-1][y-1] == ON) num_adj++;
-    if (y+1 < ROWS)
+    }
+    if (y+1 < ROWS) {
         if (board[x][y+1] == ON) num_adj++;
         if (x+1 < COLS)
             if (board[x+1][y+1] == ON) num_adj++;
         if (x-1 >= 0)
             if (board[x-1][y+1] == ON) num_adj++;
+    }
     if (x-1 >= 0)
         if (board[x-1][y] == ON) num_adj++;
     if (x+1 < COLS)
         if (board[x+1][y] == ON) num_adj++;
     return num_adj;
 }
-
+*/
 void update_board(void) {
     short neighbours = 0;
 
