@@ -135,31 +135,6 @@ short num_neighbours(short x, short y) {
     if (board[tmpx][tmpy] == ON) num_adj++;
     return num_adj;
 }
-/*
-short num_neighbours(short x, short y) {
-    short num_adj = 0;
-
-    if (y-1 >= 0) {
-        if (board[x][y-1] == ON) num_adj++;
-        if (x+1 < COLS)
-            if (board[x+1][y-1] == ON) num_adj++;
-        if (x-1 >= 0)
-            if (board[x-1][y-1] == ON) num_adj++;
-    }
-    if (y+1 < ROWS) {
-        if (board[x][y+1] == ON) num_adj++;
-        if (x+1 < COLS)
-            if (board[x+1][y+1] == ON) num_adj++;
-        if (x-1 >= 0)
-            if (board[x-1][y+1] == ON) num_adj++;
-    }
-    if (x-1 >= 0)
-        if (board[x-1][y] == ON) num_adj++;
-    if (x+1 < COLS)
-        if (board[x+1][y] == ON) num_adj++;
-    return num_adj;
-}
-*/
 void update_board(void) {
     short neighbours = 0;
 
