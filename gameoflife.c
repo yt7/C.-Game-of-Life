@@ -4,8 +4,8 @@
 #include <time.h>
 #include <SDL/SDL.h>
 
-#define ROWS 50
-#define COLS 50
+#define ROWS 45
+#define COLS 45
 #define OFF 0
 #define ON 1
 
@@ -15,6 +15,12 @@
 * first in the outer loop so that it represents the rows while x, declared
 * within the y loop becomes the variable representing each column value.
 */
+
+/** Bugs
+  * = Severity -> Low
+  *   - When ROWS or COLS is greater than the other, only a squared area
+  *     is actually updated.
+ */
 
 static char board[ROWS][COLS];
 static char temp[ROWS][COLS];
@@ -50,7 +56,7 @@ int main(int argc, char* argv[]) {
         SDL_Delay(250);
         update_board();
         print_board();
-        printf("\n\n");
+        printf("\n\n\n\n\n");
     }
     return EXIT_SUCCESS;
 }
