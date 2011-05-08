@@ -36,14 +36,14 @@ int main(void) {
     memset((void *)board, OFF, ROWS * COLS);
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
-            board[y][x] = OFF;
+            board[x][y] = OFF;
         }
     }
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
             generator = (short)(rand() % 5);
             if (generator == 0)
-                board[y][x] = ON;
+                board[x][y] = ON;
         }
     }
     for (int y = 0; y < ROWS; y++) {
@@ -65,7 +65,7 @@ void print_board(void) {
     printf("|");
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
-            if (board[y][x] == ON)
+            if (board[x][y] == ON)
                 printf("X");
             else
                 printf(" ");
