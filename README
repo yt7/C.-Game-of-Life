@@ -1,0 +1,19 @@
+This is an implementation of Conway's famous Game of Life written in C.
+This program makes use of the SDL (Simple Directmedia Library) currently
+to provide a cross-platform means for pausing between screen updates.
+In the future, it will also be used as a graphical frontend for this
+application.
+
+Note that I am obviously not the initial creator of the Game of Life,
+and that all credits for having invented it go to John Horton Conway
+himself for that. I also do not own any portion of the SDL.
+
+This program is free and open source software and you are welcome to
+download, use, modify, and distribute it under the terms of the GPL.
+
+Note that, under Windows, you may wish to use MSys with MinGW in order
+to compile this program using the Makefile provided. You will also need
+to manually install the SDL.  For *nix users, you should be able to 
+simply run make on the Makefile immediately as most distributions come
+with make built in.  To get the SDL, you may (under Linux) simply have
+to run the command to install (via your package manager) libsdl1.2-dev.
