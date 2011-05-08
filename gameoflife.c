@@ -9,26 +9,40 @@
 #define OFF 0
 #define ON 1
 
-static char board[ROWS][COLS];
+/** Note to self:
+* Always refer to the board as board[x][y] as to follow the general
+* standard for specifying coordinates. When looping, y must be declared
+* first in the outer loop so that it represents the rows while x, declared
+* within the y loop becomes the variable representing each column value.
+*/
 
-/** Bugs:
-  * When COLS is significantly larger than ROWS, there is a segfault at runtime.
-  * When ROWS is larger than COLS, only COLS rows are updated.1
- */
+static char board[ROWS][COLS];
+static char temp[ROWS][COLS];
+
 void print_board(void);
-int num_neighbours(int x, int y);
+short num_neighbours(short x, short y);
 void update_board(void);
 
 int main(int argc, char* argv[]) {
-    int generator;
+    short generator;
 
     srand(time(NULL));
     memset((void *)board, OFF, ROWS * COLS);
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
-            generator = rand() % 8;
+            board[y][x] = OFF;
+        }
+    }
+    for (int y = 0; y < ROWS; y++) {
+        for (int x = 0; x < COLS; x++) {
+            generator = (short)(rand() % 5);
             if (generator == 0)
                 board[y][x] = ON;
+        }
+    }
+    for (int y = 0; y < ROWS; y++) {
+        for (int x = 0; x < COLS; x++) {
+            temp[x][y] = board[x][y];
         }
     }
     print_board();
@@ -56,8 +70,8 @@ void print_board(void) {
     printf("\n");
 }
 
-int num_neighbours(int x, int y) {
-    int num_adj = 0;
+short num_neighbours(short x, short y) {
+    short num_adj = 0;
 
     if (y-1 >= 0)
         if (board[x][y-1] == ON) num_adj++;
@@ -79,19 +93,24 @@ int num_neighbours(int x, int y) {
 }
 
 void update_board(void) {
-    int neighbours = 0;
+    short neighbours = 0;
 
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
             neighbours = num_neighbours(x, y);
             if (neighbours < 2 && board[x][y] == ON) {
-                board[x][y] = OFF; /* Dies by underpopulation. */
+                temp[x][y] = OFF; /* Dies by underpopulation. */
             } else if (neighbours > 3 && board[x][y] == ON) {
-                board[x][y] = OFF; /* Dies by overpopulation. */
+                temp[x][y] = OFF; /* Dies by overpopulation. */
             } else if (neighbours == 3 && board[x][y] == OFF) {
-                board[x][y] = ON; /* Becomes alive because of reproduction. */
+                temp[x][y] = ON; /* Become alive because of reproduction. */
             }
             /* Otherwise the cell lives with just the right company. */
+        }
+    }
+    for (int y = 0; y < ROWS; y++) {
+        for (int x = 0; x < COLS; x++) {
+            board[x][y] = temp[x][y];
         }
     }
 }
