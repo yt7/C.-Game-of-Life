@@ -1,23 +1,41 @@
-This is an implementation of Conway's famous Game of Life written in C.
-This program makes use of the SDL (Simple Directmedia Library) currently
-to provide a cross-platform means for pausing between screen updates.
-In the future, it will also be used as a graphical frontend for this
+    This is an implementation of Conway's famous Game of Life written in C.
+This program makes use of the SDL (Simple Directmedia Library)
+to provide a cross-platform graphical frontend for this
 application.
 
-Note that I am obviously not the initial creator of the Game of Life,
+==== HOW TO PLAY ====
+    This game offers a handful of features to make playing more fun and
+interactive. The features, as well as the action to initiate them are:
+ ___________________________________________________________
+| Action         | Description              | Command       |
+|----------------|--------------------------|---------------|
+| Clear Screen   | Clears the screen,       | Shift Key     |
+|                | killing all live cells.  |               |
+|----------------|--------------------------|---------------|
+| Create Cell    | Brings the cell under the| Left Click    |
+|                | clicked area to life.    | dead cell     |
+|----------------|--------------------------|---------------|
+| Kill Cell      | Kills the cell under the | Left click    |
+|                | area clicked.            | live cell     |
+|----------------|--------------------------|---------------|
+| Pause Game     | Pauses the whole game.   | Enter Key     |
+|                | You can still interact.  |               |
+|----------------|--------------------------|---------------|
+| Randomize Board| Randomly gives life to   | Space Key     |
+|                | 1/5th of the cells.      |               |
+|----------------|--------------------------|---------------|
+| Quit Game      | Exits the program.       | Click X button|
+|                |                          | Esp Key       |
+|----------------|--------------------------|---------------|
+
+    Note that I am obviously not the initial creator of the Game of Life,
 and that all credits for having invented it go to John Horton Conway
 himself for that. I also do not own any portion of the SDL.
 
-To run this program, you can supply a command line argument.
-If you run the program as "gameoflife txt", the game will run in the textual
-mode using stdout to print the board. You can also supply "gfx" to use the SDL
-version, though this will be the default even if this second argument is not
-supplied at all.
-
-This program is free and open source software and you are welcome to
+    This program is free and open source software and you are welcome to
 download, use, modify, and distribute it under the terms of the GPL.
 
-Note that, under Windows, you may wish to use MSys with MinGW in order
+    Note that, under Windows, you may wish to use MSys with MinGW in order
 to compile this program using the Makefile provided. You will also need
 to manually install the SDL.  For *nix users, you should be able to 
 simply run make on the Makefile immediately as most distributions come
