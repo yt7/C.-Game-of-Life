@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <math.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 
@@ -248,23 +249,9 @@ int gfx_main(void) {
                     puts("Got mouse event!");
                     if (event.button.button == SDL_BUTTON_LEFT) {
                         puts("SDL_BUTTON_LEFT found!");
-                        int tempx = event.button.x;
-                        int tempy = event.button.y;
-                        printf("Mouse at pos (%d, %d)\n", tempx, tempy);
-                        for (int y = 0; y < ROWS; y++) {
-                            if (tempy > cells[0][y].y &&
-                                tempy < cells[0][y].y + cell_height) {
-                                tempy = y;
-                                printf("Y pos is %d\n", tempy);
-                            }
-                        }
-                        for (int x = 0; x < COLS; x++ ) {
-                            if (tempx > cells[x][0].x &&
-                                tempx < cells[x][0].x + cell_width) {
-                                tempx = x;
-                                printf("X pos is %d\n", tempx);
-                            }
-                        }
+                        if (event.button.y > (ROWS * cell_height)) break;
+                        int tempx = floor(event.button.x / cell_width);
+                        int tempy = floor(event.button.y / cell_height);
                         if (board[tempx][tempy] == OFF) {
                             board[tempx][tempy] = ON;
                             SDL_BlitSurface(
