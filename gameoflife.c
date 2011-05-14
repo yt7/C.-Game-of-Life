@@ -28,28 +28,31 @@
   *     is actually updated or a segfault is fired.
  */
 
-static char board[ROWS][COLS];
-static char temp[ROWS][COLS];
+typedef struct {
+    int x;
+    int y;
+} point;
 
+char board[ROWS][COLS];
+char temp[ROWS][COLS];
+SDL_Rect cells[ROWS][COLS]; /* Stores positions of each cell for blits. */
+
+void randomize_board(void);
+void blit_board(SDL_Surface* bcell, SDL_Surface* screen);
 void print_board(void);
 int num_neighbours(int x, int y);
 void update_board(void);
 void load_glider(int x, int y);
 int txt_main(void);
+//void loop_callback(void (*callback)(point));
+//void randomize_cell(point p);
 int gfx_main(void);
 
 int main(int argc, char* argv[]) {
-    int generator;
+    //int generator;
     
-    srand(time(NULL));
     memset((void *)board, OFF, ROWS * COLS);
-    for (int y = 0; y < ROWS; y++) {
-        for (int x = 0; x < COLS; x++) {
-            generator = rand() % 5;
-            if (generator == 0)
-                board[x][y] = ON;
-        }
-    }
+    //loop_callback(randomize_cell);
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
             temp[x][y] = board[x][y];
@@ -58,6 +61,17 @@ int main(int argc, char* argv[]) {
     if (argc >= 2 && strncmp(argv[1], "txt", 3) == 0)
         return txt_main();
     return gfx_main();
+}
+
+void randomize_board(void) {
+    memset((void *)board, OFF, ROWS * COLS);
+    for (int y = 0; y < ROWS; y++) {
+        for (int x = 0; x < COLS; x++) {
+            if (rand() % 5 == 0) {
+                board[x][y] = ON;
+            }
+        }
+    }
 }
 
 void print_board(void) {
@@ -73,6 +87,20 @@ void print_board(void) {
         if (y < (ROWS - 1)) printf("\n|");
     }
     printf("\n");
+}
+
+void blit_board(SDL_Surface* bcell, SDL_Surface* screen) {
+    for (int y = 0; y < ROWS; y++) {
+        for (int x = 0; x < COLS; x++) {
+            if (board[x][y] == ON) {
+                SDL_BlitSurface(
+                    bcell, 
+                    &(bcell->clip_rect), 
+                    screen, 
+                    &cells[x][y]);
+            }
+        }
+    }
 }
 
 int num_neighbours(int x, int y) {
@@ -170,11 +198,12 @@ int txt_main(void) {
 int gfx_main(void) {
     SDL_Init(SDL_INIT_VIDEO);
     SDL_WM_SetCaption("Conway's Game of Life - Ryuurei", NULL);
-    SDL_Rect cells[ROWS][COLS]; /* Stores positions of each cell for blits. */
     SDL_Event event;
     int breaker = 0;
+    int paused = 1;
+    randomize_board();
     SDL_Surface* screen = SDL_SetVideoMode(
-                              scr_width, scr_height, 0, 
+                              scr_width, scr_height + 40, 0, 
                               SDL_SWSURFACE | SDL_DOUBLEBUF);
     if (! screen) {
         perror("SDL_SetVideoMode");
@@ -188,8 +217,8 @@ int gfx_main(void) {
     /* Calculate position of each cell rect for positioning on the screen. */
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
-            (cells[x][y]).x = cell_width * x;
-            (cells[x][y]).y = cell_height * y;
+            (cells[x][y]).x = (cell_width * x);
+            (cells[x][y]).y = (cell_height * y);
         }
     }
     SDL_Surface* bcell = SDL_CreateRGBSurface(
@@ -198,23 +227,54 @@ int gfx_main(void) {
         perror("BLACK SDL_CreateRGBSurface");
         return EXIT_FAILURE;
     }
+    SDL_Flip(screen);
     while (1) {
-        for (int y = 0; y < ROWS; y++) {
-            for (int x = 0; x < COLS; x++) {
-                if (board[x][y] == ON) {
-                    SDL_BlitSurface(
-                        bcell, 
-                        &(bcell->clip_rect), 
-                        screen, 
-                        &cells[x][y]);
-                }
-            }
-        }
-        SDL_Flip(screen);
-        update_board();
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
-                case SDL_QUIT: breaker = 1;
+                case SDL_QUIT: 
+                    breaker = 1;
+                    break;
+                case SDL_KEYDOWN:
+                    if (event.key.keysym.sym == SDLK_KP_ENTER ||
+                        event.key.keysym.sym == SDLK_RETURN) {
+                        paused = !paused;
+                    } else if (event.key.keysym.sym == SDLK_SPACE) {
+                        SDL_FillRect(screen, &(screen->clip_rect), bgcolor);
+                        randomize_board();
+                        SDL_Flip(screen);
+                    }
+                    break;
+                case SDL_MOUSEBUTTONDOWN:
+                    puts("Got mouse event!");
+                    if (event.button.button == SDL_BUTTON_LEFT) {
+                        puts("SDL_BUTTON_LEFT found!");
+                        int tempx = event.button.x;
+                        int tempy = event.button.y;
+                        printf("Mouse at pos (%d, %d)\n", tempx, tempy);
+                        for (int y = 0; y < ROWS; y++) {
+                            if (tempy > cells[0][y].y &&
+                                tempy < cells[0][y].y + cell_height) {
+                                tempy = y;
+                                printf("Y pos is %d\n", tempy);
+                            }
+                        }
+                        for (int x = 0; x < COLS; x++ ) {
+                            if (tempx > cells[x][0].x &&
+                                tempx < cells[x][0].x + cell_width) {
+                                tempx = x;
+                                printf("X pos is %d\n", tempx);
+                            }
+                        }
+                        if (board[tempx][tempy] == OFF) {
+                            board[tempx][tempy] = ON;
+                            SDL_BlitSurface(
+                                bcell,
+                                &(bcell->clip_rect),
+                                screen,
+                                &cells[tempx][tempy]);
+                        }
+                    }
+                    break;
                 default: continue;
             }
             if (breaker)
@@ -222,8 +282,13 @@ int gfx_main(void) {
         }
         if (breaker)
             break;
-        SDL_Delay(250);
-        SDL_FillRect(screen, &(screen->clip_rect), bgcolor);
+        blit_board(bcell, screen);
+        SDL_Flip(screen);
+        if (!paused) {
+            update_board();
+            SDL_Delay(250);
+            SDL_FillRect(screen, &(screen->clip_rect), bgcolor);
+        }
     }
     return EXIT_SUCCESS;
 }
