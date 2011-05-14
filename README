@@ -25,7 +25,7 @@ interactive. The features, as well as the action to initiate them are:
 |                | 1/5th of the cells.      |               |
 |----------------|--------------------------|---------------|
 | Quit Game      | Exits the program.       | Click X button|
-|                |                          | Esp Key       |
+|                |                          | Esc Key       |
 |----------------|--------------------------|---------------|
 
     Note that I am obviously not the initial creator of the Game of Life,
