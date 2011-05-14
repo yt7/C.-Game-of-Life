@@ -8,6 +8,12 @@ Note that I am obviously not the initial creator of the Game of Life,
 and that all credits for having invented it go to John Horton Conway
 himself for that. I also do not own any portion of the SDL.
 
+To run this program, you can supply a command line argument.
+If you run the program as "gameoflife txt", the game will run in the textual
+mode using stdout to print the board. You can also supply "gfx" to use the SDL
+version, though this will be the default even if this second argument is not
+supplied at all.
+
 This program is free and open source software and you are welcome to
 download, use, modify, and distribute it under the terms of the GPL.
 
