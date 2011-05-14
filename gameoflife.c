@@ -55,11 +55,6 @@ int main(int argc, char* argv[]) {
             board[x][y] = OFF;
         }
     } 
-    /*
-    load_glider(0, 0);
-    load_glider(6, 0);
-    load_glider(12, 0);
-    */
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
             generator = rand() % 5;
@@ -81,14 +76,6 @@ int main(int argc, char* argv[]) {
     else
         return gfx_main();
     return 0;
-}
-
-void load_glider(int x, int y) {
-    board[x+2][y] = ON;
-    board[x+2][y+1] = ON;
-    board[x+2][y+2] = ON;
-    board[x+1][y+2] = ON;
-    board[x][y+1] = ON;
 }
 
 void print_board(void) {
