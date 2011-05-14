@@ -195,8 +195,6 @@ int gfx_main(void) {
         perror("SDL_FillRect");
         return EXIT_FAILURE;
     }
-    SDL_Flip(screen);
-    SDL_Delay(5000);
     /* Calculate position of each cell rect for positioning on the screen. */
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
