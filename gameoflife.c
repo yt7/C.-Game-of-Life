@@ -5,8 +5,8 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 
-#define ROWS 40
-#define COLS 40
+#define ROWS 60
+#define COLS 60
 #define OFF 0
 #define ON 1
 #define BLACK 8, 0, 0, 0, 0
@@ -24,15 +24,9 @@
  */
 
 /** Bugs
-  * = Severity -> High
-  *   - Screen is not filled to white in gfx mode. Following effects are
-  *     unobservable.
-  * = Severity -> Medium
-  *   - When no mode is entered, a segfault is fired after the error message,
-  *     "Cancelling", is done printing.
   * = Severity -> Low
   *   - When ROWS or COLS is greater than the other, only a squared area
-  *     is actually updated.
+  *     is actually updated or a segfault is fired.
  */
 
 static char board[ROWS][COLS];
