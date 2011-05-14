@@ -37,6 +37,8 @@ void randomize_board(void);
 void blit_board(SDL_Surface* bcell, SDL_Surface* screen);
 int num_neighbours(int x, int y);
 void update_board(void);
+int clear_board(SDL_Surface* screen, Uint32 color);
+int clear_cell(SDL_Surface* screen, int x, int y, Uint32 color);
 void initialize_cells_array(void);
 
 int main(void) {
@@ -81,21 +83,33 @@ int main(void) {
                     } else if (event.key.keysym.sym == SDLK_ESCAPE) {
                         breaker = 1;
                         break;
+                    } else if (event.key.keysym.sym == SDLK_RSHIFT ||
+                               event.key.keysym.sym == SDLK_LSHIFT) {
+                        if (clear_board(screen, bgcolor) == -1) {
+                            perror("clear_board");
+                            return EXIT_FAILURE;
+                        }
                     }
                     break;
                 case SDL_MOUSEBUTTONDOWN:
                     if (event.button.button == SDL_BUTTON_LEFT) {
                         if (event.button.y > (ROWS * cell_height)) break;
-                        int tempx = floor(event.button.x / cell_width);
-                        int tempy = floor(event.button.y / cell_height);
-                        if (board[tempx][tempy] == OFF) {
-                            board[tempx][tempy] = ON;
-                            temp[tempx][tempy] = ON;
+                        int tx = floor(event.button.x / cell_width);
+                        int ty = floor(event.button.y / cell_height);
+                        if (board[tx][ty] == OFF) {
+                            board[tx][ty] = ON;
+                            temp[tx][ty] = ON;
                             SDL_BlitSurface(
                                 bcell,
                                 &(bcell->clip_rect),
                                 screen,
-                                &cells[tempx][tempy]);
+                                &cells[tx][ty]);
+                        } else {
+                            if (clear_cell(
+                                    screen, tx, ty, bgcolor) == -1) {
+                                perror("clear_cell");
+                                return EXIT_FAILURE;       
+                            }
                         }
                     }
                     break;
@@ -227,6 +241,25 @@ void update_board(void) {
             board[x][y] = temp[x][y];
         }
     }
+}
+
+int clear_board(SDL_Surface* screen, Uint32 color) {
+    for (int y = 0; y < ROWS; y++) {
+        for (int x = 0; x < COLS; x++) {
+            board[x][y] = OFF;
+            temp[x][y] = OFF;
+        }
+    }
+    return SDL_FillRect(screen, &(screen->clip_rect), color);
+}
+
+int clear_cell(SDL_Surface* screen, int x, int y, Uint32 color) {
+    SDL_Rect rect;
+    rect.x = cell_width * x;
+    rect.y = cell_height * y;
+    board[x][y] = OFF;
+    temp[x][y] = OFF;
+    return SDL_FillRect(screen, &rect, color);
 }
 
 void initialize_cells_array(void) {
