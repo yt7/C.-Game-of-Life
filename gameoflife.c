@@ -3,20 +3,33 @@
 #include <string.h>
 #include <time.h>
 #include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
 
-#define ROWS 45
-#define COLS 45
+#define ROWS 40
+#define COLS 40
 #define OFF 0
 #define ON 1
+#define BLACK 8, 0, 0, 0, 0
+#define WHITE 8, 255, 255, 255, 0
+#define scr_width 600
+#define scr_height 600
+#define cell_width (scr_width / ROWS)
+#define cell_height (scr_height / COLS)
 
 /** Note to self:
-* Always refer to the board as board[x][y] as to follow the general
-* standard for specifying coordinates. When looping, y must be declared
-* first in the outer loop so that it represents the rows while x, declared
-* within the y loop becomes the variable representing each column value.
-*/
+  * Always refer to the board as board[x][y] as to follow the general
+  * standard for specifying coordinates. When looping, y must be declared
+  * first in the outer loop so that it represents the rows while x, declared
+  * within the y loop becomes the variable representing each column value.
+ */
 
 /** Bugs
+  * = Severity -> High
+  *   - Screen is not filled to white in gfx mode. Following effects are
+  *     unobservable.
+  * = Severity -> Medium
+  *   - When no mode is entered, a segfault is fired after the error message,
+  *     "Cancelling", is done printing.
   * = Severity -> Low
   *   - When ROWS or COLS is greater than the other, only a squared area
   *     is actually updated.
@@ -26,22 +39,30 @@ static char board[ROWS][COLS];
 static char temp[ROWS][COLS];
 
 void print_board(void);
-short num_neighbours(short x, short y);
+int num_neighbours(int x, int y);
 void update_board(void);
+void load_glider(int x, int y);
+int txt_main(void);
+int gfx_main(void);
 
-int main(void) {
-    short generator;
-
+int main(int argc, char* argv[]) {
+    int generator;
+    
     srand(time(NULL));
     memset((void *)board, OFF, ROWS * COLS);
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
             board[x][y] = OFF;
         }
-    }
+    } 
+    /*
+    load_glider(0, 0);
+    load_glider(6, 0);
+    load_glider(12, 0);
+    */
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
-            generator = (short)(rand() % 5);
+            generator = rand() % 5;
             if (generator == 0)
                 board[x][y] = ON;
         }
@@ -51,14 +72,23 @@ int main(void) {
             temp[x][y] = board[x][y];
         }
     }
-    print_board();
-    for (int i = 0; i <= 10000; i++) {
-        SDL_Delay(250);
-        update_board();
-        print_board();
-        printf("\n\n\n\n\n");
-    }
-    return EXIT_SUCCESS;
+    if (argc < 2)
+        return gfx_main();
+    if (strncmp(argv[1], "txt", 3) >= 0) 
+        return txt_main();
+    else if (strncmp(argv[1], "gfx", 3) >= 0) 
+        return gfx_main();
+    else
+        return gfx_main();
+    return 0;
+}
+
+void load_glider(int x, int y) {
+    board[x+2][y] = ON;
+    board[x+2][y+1] = ON;
+    board[x+2][y+2] = ON;
+    board[x+1][y+2] = ON;
+    board[x][y+1] = ON;
 }
 
 void print_board(void) {
@@ -76,10 +106,10 @@ void print_board(void) {
     printf("\n");
 }
 
-short num_neighbours(short x, short y) {
-    short num_adj = 0;
-    short tmpy;
-    short tmpx;
+int num_neighbours(int x, int y) {
+    int num_adj = 0;
+    int tmpy;
+    int tmpx;
 
     /* Check vertical neighbours. */
     if (y-1 < 0)
@@ -136,7 +166,7 @@ short num_neighbours(short x, short y) {
     return num_adj;
 }
 void update_board(void) {
-    short neighbours = 0;
+    int neighbours = 0;
 
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
@@ -156,4 +186,76 @@ void update_board(void) {
             board[x][y] = temp[x][y];
         }
     }
+}
+
+int txt_main(void) {
+    while (1) {
+        print_board();
+        update_board();
+        printf("\n\n\n\n\n\n");
+        SDL_Delay(250);
+    }
+    return EXIT_SUCCESS;
+}
+
+int gfx_main(void) {
+    SDL_Init(SDL_INIT_VIDEO);
+    SDL_Rect cells[ROWS][COLS]; /* Stores positions of each cell for blits. */
+    SDL_Event event;
+    int breaker = 0;
+    SDL_Surface* screen = SDL_SetVideoMode(
+                              scr_width, scr_height, 0, 
+                              SDL_SWSURFACE | SDL_DOUBLEBUF);
+    if (! screen) {
+        perror("SDL_SetVideoMode");
+        return EXIT_FAILURE;
+    }
+    Uint32 bgcolor = SDL_MapRGB(screen->format, 0xFF, 0xFF, 0xFF);
+    if (SDL_FillRect(screen, &(screen->clip_rect), bgcolor) == -1) {
+        perror("SDL_FillRect");
+        return EXIT_FAILURE;
+    }
+    SDL_Flip(screen);
+    SDL_Delay(5000);
+    /* Calculate position of each cell rect for positioning on the screen. */
+    for (int y = 0; y < ROWS; y++) {
+        for (int x = 0; x < COLS; x++) {
+            (cells[x][y]).x = cell_width * x;
+            (cells[x][y]).y = cell_height * y;
+        }
+    }
+    SDL_Surface* bcell = SDL_CreateRGBSurface(
+                              SDL_SWSURFACE, cell_width, cell_height, BLACK);
+    if (! bcell) {
+        perror("BLACK SDL_CreateRGBSurface");
+        return EXIT_FAILURE;
+    }
+    while (1) {
+        for (int y = 0; y < ROWS; y++) {
+            for (int x = 0; x < COLS; x++) {
+                if (board[x][y] == ON) {
+                    SDL_BlitSurface(
+                        bcell, 
+                        &(bcell->clip_rect), 
+                        screen, 
+                        &cells[x][y]);
+                }
+            }
+        }
+        SDL_Flip(screen);
+        update_board();
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+                case SDL_QUIT: breaker = 1;
+                default: continue;
+            }
+            if (breaker)
+                break;
+        }
+        if (breaker)
+            break;
+        SDL_Delay(250);
+        SDL_FillRect(screen, &(screen->clip_rect), bgcolor);
+    }
+    return EXIT_SUCCESS;
 }
