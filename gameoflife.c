@@ -10,7 +10,6 @@
 #define OFF 0
 #define ON 1
 #define BLACK 8, 0, 0, 0, 0
-#define WHITE 8, 255, 255, 255, 0
 #define scr_width 600
 #define scr_height 600
 #define cell_width (scr_width / ROWS)
