@@ -1,5 +1,5 @@
 CC=gcc
-FLAGS=-Wall -Wextra -Wshadow -std=c99
+FLAGS=-Wall -Wextra -Wshadow -std=c99 -lm
 LIBS=-lSDL
 BIN=/usr/bin/
 
