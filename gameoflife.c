@@ -45,11 +45,6 @@ int main(int argc, char* argv[]) {
     memset((void *)board, OFF, ROWS * COLS);
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
-            board[x][y] = OFF;
-        }
-    } 
-    for (int y = 0; y < ROWS; y++) {
-        for (int x = 0; x < COLS; x++) {
             generator = rand() % 5;
             if (generator == 0)
                 board[x][y] = ON;
@@ -60,15 +55,9 @@ int main(int argc, char* argv[]) {
             temp[x][y] = board[x][y];
         }
     }
-    if (argc < 2)
-        return gfx_main();
-    if (strncmp(argv[1], "txt", 3) >= 0) 
+    if (argc >= 2 && strncmp(argv[1], "txt", 3) == 0)
         return txt_main();
-    else if (strncmp(argv[1], "gfx", 3) >= 0) 
-        return gfx_main();
-    else
-        return gfx_main();
-    return 0;
+    return gfx_main();
 }
 
 void print_board(void) {
@@ -180,6 +169,7 @@ int txt_main(void) {
 
 int gfx_main(void) {
     SDL_Init(SDL_INIT_VIDEO);
+    SDL_WM_SetCaption("Conway's Game of Life - Ryuurei", NULL);
     SDL_Rect cells[ROWS][COLS]; /* Stores positions of each cell for blits. */
     SDL_Event event;
     int breaker = 0;
