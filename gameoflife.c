@@ -29,39 +29,94 @@
   *     is actually updated or a segfault is fired.
  */
 
-typedef struct {
-    int x;
-    int y;
-} point;
-
 char board[ROWS][COLS];
 char temp[ROWS][COLS];
 SDL_Rect cells[ROWS][COLS]; /* Stores positions of each cell for blits. */
 
 void randomize_board(void);
 void blit_board(SDL_Surface* bcell, SDL_Surface* screen);
-void print_board(void);
 int num_neighbours(int x, int y);
 void update_board(void);
-void load_glider(int x, int y);
-int txt_main(void);
-//void loop_callback(void (*callback)(point));
-//void randomize_cell(point p);
-int gfx_main(void);
 
-int main(int argc, char* argv[]) {
-    //int generator;
-    
-    memset((void *)board, OFF, ROWS * COLS);
-    //loop_callback(randomize_cell);
+int main(void) {
+    SDL_Init(SDL_INIT_VIDEO);
+    SDL_WM_SetCaption("Conway's Game of Life - Ryuurei", NULL);
+    SDL_Event event;
+    int breaker = 0;
+    int paused = 1;
+    SDL_Surface* screen = SDL_SetVideoMode(
+                              scr_width, scr_height + 40, 0, 
+                              SDL_SWSURFACE | SDL_DOUBLEBUF);
+    if (! screen) {
+        perror("SDL_SetVideoMode");
+        return EXIT_FAILURE;
+    }
+    Uint32 bgcolor = SDL_MapRGB(screen->format, 0xFF, 0xFF, 0xFF);
+    if (SDL_FillRect(screen, &(screen->clip_rect), bgcolor) == -1) {
+        perror("SDL_FillRect");
+        return EXIT_FAILURE;
+    }
+    /* Calculate position of each cell rect for positioning on the screen. */
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
-            temp[x][y] = board[x][y];
+            (cells[x][y]).x = (cell_width * x);
+            (cells[x][y]).y = (cell_height * y);
         }
     }
-    if (argc >= 2 && strncmp(argv[1], "txt", 3) == 0)
-        return txt_main();
-    return gfx_main();
+    SDL_Surface* bcell = SDL_CreateRGBSurface(
+                              SDL_SWSURFACE, cell_width, cell_height, BLACK);
+    if (! bcell) {
+        perror("BLACK SDL_CreateRGBSurface");
+        return EXIT_FAILURE;
+    }
+    SDL_Flip(screen);
+    while (1) {
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+                case SDL_QUIT: 
+                    breaker = 1;
+                    break;
+                case SDL_KEYDOWN:
+                    if (event.key.keysym.sym == SDLK_KP_ENTER ||
+                        event.key.keysym.sym == SDLK_RETURN) {
+                        paused = !paused;
+                    } else if (event.key.keysym.sym == SDLK_SPACE) {
+                        SDL_FillRect(screen, &(screen->clip_rect), bgcolor);
+                        randomize_board();
+                    }
+                    break;
+                case SDL_MOUSEBUTTONDOWN:
+                    if (event.button.button == SDL_BUTTON_LEFT) {
+                        if (event.button.y > (ROWS * cell_height)) break;
+                        int tempx = floor(event.button.x / cell_width);
+                        int tempy = floor(event.button.y / cell_height);
+                        if (board[tempx][tempy] == OFF) {
+                            board[tempx][tempy] = ON;
+                            temp[tempx][tempy] = ON;
+                            SDL_BlitSurface(
+                                bcell,
+                                &(bcell->clip_rect),
+                                screen,
+                                &cells[tempx][tempy]);
+                        }
+                    }
+                    break;
+                default: continue;
+            }
+            if (breaker)
+                break;
+        }
+        if (breaker)
+            break;
+        blit_board(bcell, screen);
+        SDL_Flip(screen);
+        if (!paused) {
+            update_board();
+            SDL_Delay(250);
+            SDL_FillRect(screen, &(screen->clip_rect), bgcolor);
+        }
+    }
+    return EXIT_SUCCESS;
 }
 
 void randomize_board(void) {
@@ -73,21 +128,11 @@ void randomize_board(void) {
             }
         }
     }
-}
-
-void print_board(void) {
-    printf("|");
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
-            if (board[x][y] == ON)
-                printf("X");
-            else
-                printf(" ");
-            printf("|");
+            temp[x][y] = board[x][y];
         }
-        if (y < (ROWS - 1)) printf("\n|");
     }
-    printf("\n");
 }
 
 void blit_board(SDL_Surface* bcell, SDL_Surface* screen) {
@@ -184,98 +229,4 @@ void update_board(void) {
             board[x][y] = temp[x][y];
         }
     }
-}
-
-int txt_main(void) {
-    while (1) {
-        print_board();
-        update_board();
-        printf("\n\n\n\n\n\n");
-        SDL_Delay(250);
-    }
-    return EXIT_SUCCESS;
-}
-
-int gfx_main(void) {
-    SDL_Init(SDL_INIT_VIDEO);
-    SDL_WM_SetCaption("Conway's Game of Life - Ryuurei", NULL);
-    SDL_Event event;
-    int breaker = 0;
-    int paused = 1;
-    randomize_board();
-    SDL_Surface* screen = SDL_SetVideoMode(
-                              scr_width, scr_height + 40, 0, 
-                              SDL_SWSURFACE | SDL_DOUBLEBUF);
-    if (! screen) {
-        perror("SDL_SetVideoMode");
-        return EXIT_FAILURE;
-    }
-    Uint32 bgcolor = SDL_MapRGB(screen->format, 0xFF, 0xFF, 0xFF);
-    if (SDL_FillRect(screen, &(screen->clip_rect), bgcolor) == -1) {
-        perror("SDL_FillRect");
-        return EXIT_FAILURE;
-    }
-    /* Calculate position of each cell rect for positioning on the screen. */
-    for (int y = 0; y < ROWS; y++) {
-        for (int x = 0; x < COLS; x++) {
-            (cells[x][y]).x = (cell_width * x);
-            (cells[x][y]).y = (cell_height * y);
-        }
-    }
-    SDL_Surface* bcell = SDL_CreateRGBSurface(
-                              SDL_SWSURFACE, cell_width, cell_height, BLACK);
-    if (! bcell) {
-        perror("BLACK SDL_CreateRGBSurface");
-        return EXIT_FAILURE;
-    }
-    SDL_Flip(screen);
-    while (1) {
-        while (SDL_PollEvent(&event)) {
-            switch (event.type) {
-                case SDL_QUIT: 
-                    breaker = 1;
-                    break;
-                case SDL_KEYDOWN:
-                    if (event.key.keysym.sym == SDLK_KP_ENTER ||
-                        event.key.keysym.sym == SDLK_RETURN) {
-                        paused = !paused;
-                    } else if (event.key.keysym.sym == SDLK_SPACE) {
-                        SDL_FillRect(screen, &(screen->clip_rect), bgcolor);
-                        randomize_board();
-                        SDL_Flip(screen);
-                    }
-                    break;
-                case SDL_MOUSEBUTTONDOWN:
-                    puts("Got mouse event!");
-                    if (event.button.button == SDL_BUTTON_LEFT) {
-                        puts("SDL_BUTTON_LEFT found!");
-                        if (event.button.y > (ROWS * cell_height)) break;
-                        int tempx = floor(event.button.x / cell_width);
-                        int tempy = floor(event.button.y / cell_height);
-                        if (board[tempx][tempy] == OFF) {
-                            board[tempx][tempy] = ON;
-                            SDL_BlitSurface(
-                                bcell,
-                                &(bcell->clip_rect),
-                                screen,
-                                &cells[tempx][tempy]);
-                        }
-                    }
-                    break;
-                default: continue;
-            }
-            if (breaker)
-                break;
-        }
-        if (breaker)
-            break;
-        blit_board(bcell, screen);
-        SDL_Flip(screen);
-        if (!paused) {
-            update_board();
-            SDL_Delay(250);
-            SDL_FillRect(screen, &(screen->clip_rect), bgcolor);
-        }
-    }
-    return EXIT_SUCCESS;
 }
