@@ -37,6 +37,7 @@ void randomize_board(void);
 void blit_board(SDL_Surface* bcell, SDL_Surface* screen);
 int num_neighbours(int x, int y);
 void update_board(void);
+void initialize_cells_array(void);
 
 int main(void) {
     SDL_Init(SDL_INIT_VIDEO);
@@ -45,7 +46,7 @@ int main(void) {
     int breaker = 0;
     int paused = 1;
     SDL_Surface* screen = SDL_SetVideoMode(
-                              scr_width, scr_height + 40, 0, 
+                              scr_width, scr_height, 0, 
                               SDL_SWSURFACE | SDL_DOUBLEBUF);
     if (! screen) {
         perror("SDL_SetVideoMode");
@@ -56,13 +57,7 @@ int main(void) {
         perror("SDL_FillRect");
         return EXIT_FAILURE;
     }
-    /* Calculate position of each cell rect for positioning on the screen. */
-    for (int y = 0; y < ROWS; y++) {
-        for (int x = 0; x < COLS; x++) {
-            (cells[x][y]).x = (cell_width * x);
-            (cells[x][y]).y = (cell_height * y);
-        }
-    }
+    initialize_cells_array();
     SDL_Surface* bcell = SDL_CreateRGBSurface(
                               SDL_SWSURFACE, cell_width, cell_height, BLACK);
     if (! bcell) {
@@ -83,6 +78,9 @@ int main(void) {
                     } else if (event.key.keysym.sym == SDLK_SPACE) {
                         SDL_FillRect(screen, &(screen->clip_rect), bgcolor);
                         randomize_board();
+                    } else if (event.key.keysym.sym == SDLK_ESCAPE) {
+                        breaker = 1;
+                        break;
                     }
                     break;
                 case SDL_MOUSEBUTTONDOWN:
@@ -227,6 +225,15 @@ void update_board(void) {
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
             board[x][y] = temp[x][y];
+        }
+    }
+}
+
+void initialize_cells_array(void) {
+    for (int y = 0; y < ROWS; y++) {
+        for (int x = 0; x < COLS; x++) {
+            (cells[x][y]).x = (cell_width * x);
+            (cells[x][y]).y = (cell_height * y);
         }
     }
 }
