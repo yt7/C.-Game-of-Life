@@ -41,3 +41,7 @@ to manually install the SDL.  For *nix users, you should be able to
 simply run make on the Makefile immediately as most distributions come
 with make built in.  To get the SDL, you may (under Linux) simply have
 to run the command to install (via your package manager) libsdl1.2-dev.
+
+    Special thanks to LAMMJohnson, the most knowledgeable person on /g/, 
+for a TON of fantastic help.  He provided me with some fantastic feedback
+and support that made the project a whole lot more rewarding!
