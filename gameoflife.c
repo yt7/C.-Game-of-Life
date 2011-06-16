@@ -17,17 +17,17 @@
 #define cell_height (scr_height / COLS)
 
 /** Note to self:
-  * Always refer to the board as board[x][y] as to follow the general
-  * standard for specifying coordinates. When looping, y must be declared
-  * first in the outer loop so that it represents the rows while x, declared
-  * within the y loop becomes the variable representing each column value.
- */
+* Always refer to the board as board[x][y] as to follow the general
+* standard for specifying coordinates. When looping, y must be declared
+* first in the outer loop so that it represents the rows while x, declared
+* within the y loop becomes the variable representing each column value.
+*/
 
 /** Bugs
-  * = Severity -> Low
-  *   - When ROWS or COLS is greater than the other, only a squared area
-  *     is actually updated or a segfault is fired.
- */
+* = Severity -> Low
+* - When ROWS or COLS is greater than the other, only a squared area
+* is actually updated or a segfault is fired.
+*/
 
 char board[ROWS][COLS];
 char temp[ROWS][COLS];
@@ -48,7 +48,7 @@ int main(void) {
     int breaker = 0;
     int paused = 1;
     SDL_Surface* screen = SDL_SetVideoMode(
-                              scr_width, scr_height, 0, 
+                              scr_width, scr_height, 0,
                               SDL_SWSURFACE | SDL_DOUBLEBUF);
     if (! screen) {
         perror("SDL_SetVideoMode");
@@ -70,7 +70,7 @@ int main(void) {
     while (1) {
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
-                case SDL_QUIT: 
+                case SDL_QUIT:
                     breaker = 1;
                     break;
                 case SDL_KEYDOWN:
@@ -94,7 +94,7 @@ int main(void) {
                 case SDL_MOUSEBUTTONDOWN:
                     if (event.button.button == SDL_BUTTON_LEFT) {
                         if (event.button.y > (ROWS * cell_height)) break;
-                        int tx = floor(event.button.x / cell_width);
+                        int tx = floor(event.button.x / cell_width);       
                         int ty = floor(event.button.y / cell_height);
                         if (board[tx][ty] == OFF) {
                             board[tx][ty] = ON;
@@ -108,7 +108,7 @@ int main(void) {
                             if (clear_cell(
                                     screen, tx, ty, bgcolor) == -1) {
                                 perror("clear_cell");
-                                return EXIT_FAILURE;       
+                                return EXIT_FAILURE;
                             }
                         }
                     }
@@ -138,10 +138,6 @@ void randomize_board(void) {
             if (rand() % 5 == 0) {
                 board[x][y] = ON;
             }
-        }
-    }
-    for (int y = 0; y < ROWS; y++) {
-        for (int x = 0; x < COLS; x++) {
             temp[x][y] = board[x][y];
         }
     }
@@ -152,9 +148,9 @@ void blit_board(SDL_Surface* bcell, SDL_Surface* screen) {
         for (int x = 0; x < COLS; x++) {
             if (board[x][y] == ON) {
                 SDL_BlitSurface(
-                    bcell, 
-                    &(bcell->clip_rect), 
-                    screen, 
+                    bcell,
+                    &(bcell->clip_rect),
+                    screen,
                     &cells[x][y]);
             }
         }
