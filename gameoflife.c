@@ -17,18 +17,22 @@
 #define cell_height (scr_height / COLS)
 
 /** Note to self:
-* Always refer to the board as board[x][y] as to follow the general
-* standard for specifying coordinates. When looping, y must be declared
-* first in the outer loop so that it represents the rows while x, declared
-* within the y loop becomes the variable representing each column value.
-*/
+  * Always refer to the board as board[x][y] as to follow the general
+  * standard for specifying coordinates. When looping, y must be declared
+  * first in the outer loop so that it represents the rows while x, declared
+  * within the y loop becomes the variable representing each column value.
+ */
 
 /** Bugs
-* = Severity -> Low
-* - When ROWS or COLS is greater than the other, only a squared area
-* is actually updated or a segfault is fired.
-*/
+  * = Severity -> Low
+  *   - When ROWS or COLS is greater than the other, only a squared area
+  *     is actually updated or a segfault is fired.
+ */
 
+/** We must hold two copies of the board so that we can analyze board and make
+  * changes to temp when killing/creating cells so that we don't cause changes 
+  * to the board to affect the following cells. 
+ */
 char board[ROWS][COLS];
 char temp[ROWS][COLS];
 SDL_Rect cells[ROWS][COLS]; /* Stores positions of each cell for blits. */
@@ -69,22 +73,29 @@ int main(void) {
         return EXIT_FAILURE;
     }
     SDL_Flip(screen);
-    while (1) {
+    while (1) { /* Infinite game loop. */
+        /** The event loop handles any events in the poll/queue
+          * even while paused. 
+         */
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
                     breaker = 1;
                     break;
                 case SDL_KEYDOWN:
+                    /* Pause on enter/return key press. */
                     if (event.key.keysym.sym == SDLK_KP_ENTER ||
                         event.key.keysym.sym == SDLK_RETURN) {
                         paused = !paused;
+                    /* Space causes the board to be randomized. */
                     } else if (event.key.keysym.sym == SDLK_SPACE) {
                         SDL_FillRect(screen, &(screen->clip_rect), bgcolor);
                         randomize_board();
+                    /* Escape button also quits. */
                     } else if (event.key.keysym.sym == SDLK_ESCAPE) {
                         breaker = 1;
                         break;
+                    /* Either shift button clears the screen. */
                     } else if (event.key.keysym.sym == SDLK_RSHIFT ||
                                event.key.keysym.sym == SDLK_LSHIFT) {
                         if (clear_board(screen, bgcolor) == -1) {
@@ -94,6 +105,10 @@ int main(void) {
                     }
                     break;
                 case SDL_MOUSEBUTTONDOWN:
+                    /** The only mouse event we handle is the left click.
+                      * If the cell being clicked is alive, kill it.
+                      * Otherwise, give it life.
+                     */
                     if (event.button.button == SDL_BUTTON_LEFT) {
                         if (event.button.y > (ROWS * cell_height)) break;
                         int tx = floor(event.button.x / cell_width);       
@@ -106,9 +121,7 @@ int main(void) {
                                 &(bcell->clip_rect),
                                 screen,
                                 &cells[tx][ty]);
-                        } else {
-                            if (clear_cell(
-                                    screen, tx, ty, bgcolor) == -1) {
+                        } else if (clear_cell(screen, tx, ty, bgcolor) == -1) {
                                 perror("clear_cell");
                                 return EXIT_FAILURE;
                             }
@@ -122,6 +135,7 @@ int main(void) {
         }
         if (breaker)
             break;
+        /* Redraw the grid so it's not painted over by clear_cell. */
         initialize_grid(screen);
         blit_board(bcell, screen);
         SDL_Flip(screen);
@@ -135,6 +149,7 @@ int main(void) {
 }
 
 void randomize_board(void) {
+    /* Clear the board then randomly set ~1/5 of them to ON. */
     memset((void *)board, OFF, ROWS * COLS);
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
@@ -147,6 +162,9 @@ void randomize_board(void) {
 }
 
 void initialize_grid(SDL_Surface* screen) {
+    /** Position horizontal and veritcal lines to form a grid to
+      * make it easier to count cell spaces when trying to draw things.
+     */
     SDL_Surface* linex = SDL_CreateRGBSurface( /* Vertical lines */
                               SDL_SWSURFACE, 1, scr_height, BLACK);
     SDL_Surface* liney = SDL_CreateRGBSurface( /* Horizontal lines */
@@ -165,6 +183,7 @@ void initialize_grid(SDL_Surface* screen) {
 }
 
 void blit_board(SDL_Surface* bcell, SDL_Surface* screen) {
+    /* Blit all the live cells onto the board. */
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
             if (board[x][y] == ON) {
@@ -179,10 +198,16 @@ void blit_board(SDL_Surface* bcell, SDL_Surface* screen) {
 }
 
 int num_neighbours(int x, int y) {
+    /** Count the number of live cells all around the cell given by
+      * the position (x, y). Of course, this includes all diagonal, vertical,
+      * and horizontal living cells. The program works using a toroidal array,
+      * thus we must check to see if it is necessary to wrap to the other side
+      * of the array in order to find cells that must be taken into account.
+     */
     int num_adj = 0;
-    int tmpy;
-    int tmpx;
-
+    int tmpy = y;
+    int tmpx = x;
+    
     if (y-1 < 0)
         tmpy = ROWS - 1;
     else
@@ -235,6 +260,10 @@ int num_neighbours(int x, int y) {
 }
 
 void update_board(void) {
+    /** Detirmine which cells live and which die. Operate on temp so that
+      * each change does not affect following changes, then copy temp into
+      * the main board to be displayed.
+     */
     int neighbours = 0;
 
     for (int y = 0; y < ROWS; y++) {
@@ -258,6 +287,7 @@ void update_board(void) {
 }
 
 int clear_board(SDL_Surface* screen, Uint32 color) {
+    /* Simply set both the main and temporary boards to completely off. */
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
             board[x][y] = OFF;
@@ -268,6 +298,7 @@ int clear_board(SDL_Surface* screen, Uint32 color) {
 }
 
 int clear_cell(SDL_Surface* screen, int x, int y, Uint32 color) {
+    /* Clear a cell by coloring it white and setting the board pos. to off. */
     SDL_Rect rect;
     rect.x = cell_width * x;
     rect.y = cell_height * y;
@@ -277,6 +308,9 @@ int clear_cell(SDL_Surface* screen, int x, int y, Uint32 color) {
 }
 
 void initialize_cells_array(void) {
+    /** Initialize the array of SDL_Rect structs that store the cell
+      * coordinates by iteratively calculating their successive positions.
+     */
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
             (cells[x][y]).x = (cell_width * x);
