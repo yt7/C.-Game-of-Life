@@ -124,7 +124,6 @@ int main(void) {
                         } else if (clear_cell(screen, tx, ty, bgcolor) == -1) {
                                 perror("clear_cell");
                                 return EXIT_FAILURE;
-                            }
                         }
                     }
                     break;
