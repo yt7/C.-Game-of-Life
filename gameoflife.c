@@ -34,6 +34,7 @@ char temp[ROWS][COLS];
 SDL_Rect cells[ROWS][COLS]; /* Stores positions of each cell for blits. */
 
 void randomize_board(void);
+void initialize_grid(SDL_Surface* screen);
 void blit_board(SDL_Surface* bcell, SDL_Surface* screen);
 int num_neighbours(int x, int y);
 void update_board(void);
@@ -60,6 +61,7 @@ int main(void) {
         return EXIT_FAILURE;
     }
     initialize_cells_array();
+    initialize_grid(screen);
     SDL_Surface* bcell = SDL_CreateRGBSurface(
                               SDL_SWSURFACE, cell_width, cell_height, BLACK);
     if (! bcell) {
@@ -120,6 +122,7 @@ int main(void) {
         }
         if (breaker)
             break;
+        initialize_grid(screen);
         blit_board(bcell, screen);
         SDL_Flip(screen);
         if (!paused) {
@@ -143,6 +146,24 @@ void randomize_board(void) {
     }
 }
 
+void initialize_grid(SDL_Surface* screen) {
+    SDL_Surface* linex = SDL_CreateRGBSurface( /* Vertical lines */
+                              SDL_SWSURFACE, 1, scr_height, BLACK);
+    SDL_Surface* liney = SDL_CreateRGBSurface( /* Horizontal lines */
+                              SDL_SWSURFACE, scr_width, 1, BLACK);
+    SDL_Rect pos_x;
+    SDL_Rect pos_y;
+    pos_x.y = pos_y.x = 0;
+    for (int i = 0; i < scr_width / (cell_width); i++) {
+        pos_x.x = cell_width + cell_width * i;
+        SDL_BlitSurface(linex, &(linex->clip_rect), screen, &pos_x);
+    }
+    for (int i = 0; i < scr_height / (cell_height); i++) {
+        pos_y.y = cell_height + cell_height * i;
+        SDL_BlitSurface(liney, &(liney->clip_rect), screen, &pos_y);
+    }
+}
+
 void blit_board(SDL_Surface* bcell, SDL_Surface* screen) {
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) {
@@ -162,7 +183,6 @@ int num_neighbours(int x, int y) {
     int tmpy;
     int tmpx;
 
-    /* Check vertical neighbours. */
     if (y-1 < 0)
         tmpy = ROWS - 1;
     else
@@ -173,7 +193,6 @@ int num_neighbours(int x, int y) {
     else
         tmpy = y + 1;
     if (board[x][tmpy] == ON) num_adj++;
-    /*Check horizontal neighbours. */
     if (x-1 < 0)
         tmpx = COLS - 1;
     else
@@ -184,7 +203,6 @@ int num_neighbours(int x, int y) {
     else
         tmpx = x + 1;
     if (board[tmpx][y] == ON) num_adj++;
-    /* Check upper diagonal neighbours. */
     if (y-1 < 0)
         tmpy = ROWS - 1;
     else
@@ -199,7 +217,6 @@ int num_neighbours(int x, int y) {
     else
         tmpx = x + 1;
     if (board[tmpx][tmpy] == ON) num_adj++;
-    /* Check lower diagonal neighbours. */
     if (y+1 >= ROWS)
         tmpy = 0;
     else
@@ -216,6 +233,7 @@ int num_neighbours(int x, int y) {
     if (board[tmpx][tmpy] == ON) num_adj++;
     return num_adj;
 }
+
 void update_board(void) {
     int neighbours = 0;
 
