@@ -54,7 +54,7 @@ int main(void) {
     int paused = 1;
     SDL_Surface* screen = SDL_SetVideoMode(
                               scr_width, scr_height, 0,
-                              SDL_SWSURFACE | SDL_DOUBLEBUF);
+                              SDL_SWSURFACE);
     if (! screen) {
         perror("SDL_SetVideoMode");
         return EXIT_FAILURE;
